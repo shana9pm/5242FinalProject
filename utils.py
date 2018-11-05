@@ -21,14 +21,14 @@ def build_parser():
                         help='Record loss or not,T for record')
     parser.add_argument('--flw', dest='flw', required=False, default='0',
                         help='Feature weight selected ')
-    parser.add_argument('--slt', dest='styleloss', required=False, default='SE',
-                        help='Style loss type selected ')
-    parser.add_argument('--clt', dest='contentloss', required=False, default='SE',
-                        help='Content loss type selected ')
+    parser.add_argument('--lt', dest='losstype', required=False, default='SE',
+                        help='Loss type selected ')
     parser.add_argument('--rstep', dest='rstep', required=False, default='50',
                         help='Record picture per step')
-
-
+    parser.add_argument('--alpha', dest='alpha', required=False, default='1.0',
+                        help='alpha')
+    parser.add_argument('--beta', dest='beta', required=False, default='10000.0',
+                        help='alpha')
     return parser
 
 
@@ -58,21 +58,13 @@ def outImageUtils(width,height):
     outputPlaceholder=K.placeholder(shape=(1, width,height, 3))
     return output,outputPlaceholder
 
-def BackConvertImage(x,width,height):
-    """
-    Convert Arrayed Image back to image
+def reload_process_img(x):
+    #RGB->BGR
+    x=x[:,:,::-1]
+    x[:, :, 0] -= 103.939
+    x[:, :, 1] -= 116.779
+    x[:, :, 2] -= 123.68
 
-    """
-    if x.shape != (width, height, 3):
-        x = x.reshape((width,height, 3))
-    x[..., 0] += 103.939
-    x[..., 1] += 116.779
-    x[..., 2] += 123.68
-    # 'BGR'->'RGB'
-    x = x[..., ::-1]
-    x = np.clip(x, 0, 255)
-    x = x.astype('uint8')
-    return x
 
 def save_original_size(x,path, target_size):
     """
