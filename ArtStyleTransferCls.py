@@ -40,15 +40,37 @@ class Styletransfer:
         #some paramters for operation
         self.count = tqdm.tqdm(total=self.iteration)
         self.name_list = self.output_name.split('.')
-        self.iterator = 1
         self.contentLoss=[]
         self.styleLoss=[]
         self.totalLoss=[]
+        self.totalLoss2=[]
         self.stop = self.iteration // self.rstep
 
     def main(self):
-        xopt, f_val, info = fmin_l_bfgs_b(self.calculate_loss, self.outputImg, fprime=self.get_grad,
-                                          maxiter=self.iteration, disp=True, callback=self.callbackF)
+        #xopt, f_val, info = fmin_l_bfgs_b(self.calculate_loss, self.outputImg, fprime=self.get_grad,
+        #                                  maxiter=self.iteration, disp=True, callback=self.callbackF)
+        for i in range(self.iteration):
+            xopt, f_val, info=fmin_l_bfgs_b(self.calculate_loss, self.outputImg, fprime=self.get_grad,
+                                          maxfun=20)
+            if self.record:
+                deepCopy=copy.deepcopy(xopt)
+                this_styleLoss = self.calculate_style_loss(deepCopy)
+                this_contentLoss = self.calculate_content_loss(deepCopy)
+                this_totalLoss=self.calculate_loss(deepCopy)
+                self.contentLoss.append(this_contentLoss)
+                self.styleLoss.append(this_styleLoss)
+                self.totalLoss.append(this_totalLoss)
+                self.totalLoss2.append(float(f_val))
+
+            if i % self.rstep == 0:
+                deepCopy = copy.deepcopy(xopt)
+                iter = i// self.rstep
+                xOut = postprocess_array(deepCopy)
+                imgName = PATH_OUTPUT + '.'.join(self.name_list[:-1]) + '_{}.{}'.format(
+                    str(iter) if iter != self.stop else 'final', self.name_list[-1])
+                _ = save_original_size(xOut, imgName, self.contentOriginalImgSize)
+            self.count.update(1)
+
         if self.record:
             plt.plot(self.totalLoss)
             plt.xlabel('Iterations')
@@ -69,6 +91,10 @@ class Styletransfer:
             plt.ylabel('Loss')
             plt.title('StyleLoss')
             plt.savefig(PATH_OUTPUT+'StyleLoss.jpg')
+            print(self.contentLoss)
+            print(self.styleLoss)
+            print(self.totalLoss)
+            print(self.totalLoss2)
         self.recordPara()
 
 
@@ -143,7 +169,7 @@ class Styletransfer:
             featMatrix = K.transpose(featMatrix)
             featMatrices.append(featMatrix)
         return featMatrices
-
+    '''
     def callbackF(self,Xi):
         """A call back function for scipy optimization to record Xi each step"""
 
@@ -165,6 +191,7 @@ class Styletransfer:
 
         self.iterator += 1
         self.count.update(1)
+    '''
 
     """The following functions are used for calculation of loss"""
     def get_style_loss_forward(self,outputPlaceholder):
