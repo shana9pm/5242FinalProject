@@ -18,8 +18,8 @@ class Styletransfer:
         self.style_name = args.style
         self.output_name = args.output
         self.iteration = int(args.iter)
-        ws=int(args.ws)
-        self.ws = wlList[ws]
+        flw=int(args.flw)
+        self.ws = wlList[flw]
         self.styleLossType=args.styleloss
         self.contentLossType=args.contentloss
         self.record=False if args.record=="F" else True
