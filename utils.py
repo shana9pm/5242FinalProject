@@ -25,6 +25,10 @@ def build_parser():
                         help='Style loss type selected ')
     parser.add_argument('--clt', dest='contentloss', required=False, default='SE',
                         help='Content loss type selected ')
+    parser.add_argument('--rstep', dest='rstep', required=False, default='50',
+                        help='Record picture per step')
+
+
     return parser
 
 
@@ -42,6 +46,7 @@ def inputImageUtils(imagePath,size):
     ImageArray=img_to_array(image)
     ImageArray=K.variable(preprocess_input(np.expand_dims(ImageArray, axis=0)), dtype='float32')
     return ImageArray,rawImageSize
+
 def outImageUtils(width,height):
     """
     Initialize image and our target image

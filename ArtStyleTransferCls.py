@@ -23,6 +23,7 @@ class Styletransfer:
         self.styleLossType=args.styleloss
         self.contentLossType=args.contentloss
         self.record=False if args.record=="F" else True
+        self.rstep=int(args.rstep)
 
         #get input pictures and get features
         contentImgArr, contentOrignialImgSize = inputImageUtils(PATH_INPUT_CONTENT + self.content_name, SIZE)
@@ -143,7 +144,7 @@ class Styletransfer:
         """A call back function for scipy optimization to record Xi each step"""
 
 
-        stop = int(self.iteration / 50)
+        stop = int(self.iteration / self.rstep)
 
         if self.record:
             deepCopy = copy.deepcopy(Xi)
@@ -152,9 +153,9 @@ class Styletransfer:
             self.contentLoss.append(this_contentLoss)
             self.styleLoss.append(this_styleLoss)
 
-        if self.iterator % 50 == 0:
+        if self.iterator % self.rstep == 0:
             deepCopy = copy.deepcopy(Xi)
-            i = int(self.iterator / 50)
+            i = int(self.iterator / self.rstep)
             xOut = postprocess_array(deepCopy)
             imgName = PATH_OUTPUT + '.'.join(self.name_list[:-1]) + '_{}.{}'.format(
                 str(i - 1) if i != stop - 1 else 'final', self.name_list[-1])
