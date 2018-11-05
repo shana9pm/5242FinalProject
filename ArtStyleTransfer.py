@@ -106,8 +106,8 @@ if __name__=='__main__':
     record=False if args.record=='F' else True
     rstep=args.rstep
     stop = iteration // 50
-    alpha=args.alpha
-    beta=args.beta
+    alpha=float(args.alpha)
+    beta=gloat(args.beta)
 
     contentLossList=[]
     styleLossList=[]
