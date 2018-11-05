@@ -50,10 +50,10 @@ class Styletransfer:
         #xopt, f_val, info = fmin_l_bfgs_b(self.calculate_loss, self.outputImg, fprime=self.get_grad,
         #                                  maxiter=self.iteration, disp=True, callback=self.callbackF)
         for i in range(self.iteration):
-            xopt, f_val, info=fmin_l_bfgs_b(self.calculate_loss, self.outputImg, fprime=self.get_grad,
+            self.outputImg, f_val, info=fmin_l_bfgs_b(self.calculate_loss, self.outputImg, fprime=self.get_grad,maxiter=1,
                                           disp=True)
             if self.record:
-                deepCopy=copy.deepcopy(xopt)
+                deepCopy=copy.deepcopy(self.outputImg)
                 this_styleLoss = self.calculate_style_loss(deepCopy)
                 this_contentLoss = self.calculate_content_loss(deepCopy)
                 this_totalLoss=self.calculate_loss(deepCopy)
