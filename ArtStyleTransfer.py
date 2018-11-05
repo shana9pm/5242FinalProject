@@ -101,7 +101,7 @@ if __name__=='__main__':
     style_name=args.style
     output_name=args.output
     iteration=int(args.iter)
-    flw=int(args.rstep)
+    flw=int(args.flw)
     lossType=args.losstype
     record=False if args.record=='F' else True
     rstep=args.rstep
