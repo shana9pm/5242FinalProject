@@ -107,7 +107,7 @@ if __name__=='__main__':
     rstep=args.rstep
     stop = iteration // 50
     alpha=float(args.alpha)
-    beta=gloat(args.beta)
+    beta=float(args.beta)
 
     contentLossList=[]
     styleLossList=[]
