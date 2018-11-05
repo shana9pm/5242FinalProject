@@ -51,7 +51,7 @@ class Styletransfer:
         #                                  maxiter=self.iteration, disp=True, callback=self.callbackF)
         for i in range(self.iteration):
             self.outputImg, f_val, info=fmin_l_bfgs_b(self.calculate_loss, self.outputImg, fprime=self.get_grad,maxiter=1,
-                                          disp=True)
+                                          disp=False)
             if self.record:
                 deepCopy=copy.deepcopy(self.outputImg)
                 this_styleLoss = self.calculate_style_loss(deepCopy)
@@ -63,7 +63,7 @@ class Styletransfer:
                 self.totalLoss2.append(float(f_val))
 
             if i % self.rstep == 0:
-                deepCopy = copy.deepcopy(xopt)
+                deepCopy = copy.deepcopy(self.outputImg)
                 iter = i// self.rstep
                 xOut = postprocess_array(deepCopy)
                 imgName = PATH_OUTPUT + '.'.join(self.name_list[:-1]) + '_{}.{}'.format(
