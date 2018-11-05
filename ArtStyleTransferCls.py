@@ -5,6 +5,7 @@ from Settings import *
 import keras.backend as K
 import copy
 import matplotlib.pyplot as plt
+import json
 
 #Note that get/calculate styleLoss/contentLoss only useful in record=True mode.
 #Normaly we would only run to get full loss so if we want to get part loss we need to feedfoward again
@@ -43,6 +44,7 @@ class Styletransfer:
         self.contentLoss=[]
         self.styleLoss=[]
         self.totalLoss=[]
+        self.stop = self.iteration // self.rstep
 
     def main(self):
         xopt, f_val, info = fmin_l_bfgs_b(self.calculate_loss, self.outputImg, fprime=self.get_grad,
@@ -67,14 +69,16 @@ class Styletransfer:
             plt.ylabel('Loss')
             plt.title('StyleLoss')
             plt.savefig(PATH_OUTPUT+'StyleLoss.jpg')
+        self.recordPara()
+
+
 
     def calculate_loss(self,outputImg):
         if outputImg.shape != (1, WIDTH, WIDTH, 3):
             outputImg = outputImg.reshape((1, WIDTH, HEIGHT, 3))
         loss_fcn = K.function([self.outModel.input], [self.get_total_loss(self.outModel.input)])
         result = loss_fcn([outputImg])[0].astype('float64')
-        #if self.record:
-        #   self.totalLoss.append(result)
+
         return result
 
     def get_total_loss(self,outputPlaceholder, alpha=1.0, beta=10000.0):
@@ -143,22 +147,20 @@ class Styletransfer:
     def callbackF(self,Xi):
         """A call back function for scipy optimization to record Xi each step"""
 
-
-        stop = int(self.iteration / self.rstep)
-
         if self.record:
             deepCopy = copy.deepcopy(Xi)
             this_styleLoss = self.calculate_style_loss(deepCopy)
             this_contentLoss = self.calculate_content_loss(deepCopy)
+            this_totalLoss=self.calculate_loss(deepCopy)
             self.contentLoss.append(this_contentLoss)
             self.styleLoss.append(this_styleLoss)
-
+            self.totalLoss.append(this_totalLoss)
         if self.iterator % self.rstep == 0:
             deepCopy = copy.deepcopy(Xi)
             i = int(self.iterator / self.rstep)
             xOut = postprocess_array(deepCopy)
             imgName = PATH_OUTPUT + '.'.join(self.name_list[:-1]) + '_{}.{}'.format(
-                str(i - 1) if i != stop - 1 else 'final', self.name_list[-1])
+                str(i) if i != self.stop else 'final', self.name_list[-1])
             _ = save_original_size(xOut, imgName, self.contentOriginalImgSize)
 
         self.iterator += 1
@@ -186,6 +188,21 @@ class Styletransfer:
             Xi = Xi.reshape((1, WIDTH, HEIGHT, 3))
         loss_fcn = K.function([self.outModel.input], [self.get_content_loss_forward(self.outModel.input)])
         return loss_fcn([Xi])[0].astype('float64')
+
+    def recordPara(self):
+        paraDict={'contentName':self.content_name,
+                  'styleName':self.style_name,
+                  'outputName':self.output_name,
+                  'maxIter':self.iteration,
+                  'flw':self.ws,
+                  'styleLossType':self.styleLossType,
+                  'contentLossType':self.contentLossType,
+                  'rstep':self.rstep
+                  }
+        with open('parameters.txt','w') as f:
+            f.write(json.dumps(paraDict))
+
+
 
 
 parser = build_parser()
