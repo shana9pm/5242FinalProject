@@ -186,3 +186,9 @@ class Styletransfer:
             Xi = Xi.reshape((1, WIDTH, HEIGHT, 3))
         loss_fcn = K.function([self.outModel.input], [self.get_content_loss_forward(self.outModel.input)])
         return loss_fcn([Xi])[0].astype('float64')
+
+
+parser = build_parser()
+args = parser.parse_args()
+cls=Styletransfer(args)
+cls.main()
